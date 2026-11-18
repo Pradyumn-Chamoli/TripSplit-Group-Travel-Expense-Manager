@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f8fc" />
+    <title>TripSplit — Group Expense Manager</title>
+    <link rel="stylesheet" href="style.css" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"
+      defer
+    ></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <a class="brand" href="#dashboard"
+          ><span class="brand-mark">✦</span
+          ><span
+            >Trip<span class="accent">Split</span
+            ><small>Travel smarter, split easier</small></span
+          ></a
+        >
+        <div class="side-label">WORKSPACE</div>
+        <nav aria-label="Main navigation">
+          <button class="nav-link active" data-section="dashboard">
+            <span>▦</span> Dashboard
+          </button>
+          <button class="nav-link" data-section="expenses">
+            <span>≡</span> Expenses
+          </button>
+          <button class="nav-link" data-section="balances">
+            <span>⇄</span> Balances
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <span class="help-emoji">✈</span
+            ><strong>Every trip, fairly split.</strong>
+            <p>Track spending and settle up with your crew.</p>
+          </div>
+          
+        </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <div class="crumb">
+            My workspace <span>/</span>
+            <strong id="crumbName">Dashboard</strong>
+          </div>
+          <div class="top-actions">
+            <span class="local-pill">● Saved locally</span>
+            <div class="avatar" aria-label="Guest user">G</div>
+          </div>
+        </header>
+        <div class="content">
+          <div class="page-heading">
+            <div>
+              <div class="eyebrow">YOUR TRAVEL FINANCES</div>
+              <h1 id="pageTitle">Overview <span class="wave">✳</span></h1>
+              <p id="pageSubtitle">
+                Keep every adventure organized, down to the last rupee.
+              </p>
+            </div>
+            <button class="primary-btn" id="addExpenseTop">
+              ＋ Add expense
+            </button>
+          </div>
+          <div class="trip-strip">
+            <div class="trip-illustration">✈</div>
+            <div class="trip-info">
+              <span class="trip-caption">CURRENT TRIP</span>
+              <h2 id="tripName">No trip yet</h2>
+              <p id="tripMeta">Create your first trip to get started</p>
+            </div>
+            <div class="trip-actions">
+              <button class="outline-btn" id="manageTrip">⚙ Manage trip</button
+              ><button class="outline-btn" id="newTrip">＋ New trip</button>
+            </div>
+          </div>
+          <section id="dashboardSection" class="section">
+            <div class="stats-grid">
+              <article class="stat-card">
+                <span class="stat-icon purple">₹</span
+                ><span class="stat-label">Total spent</span
+                ><strong id="totalSpent">₹0</strong
+                ><span class="stat-note">Across all trip expenses</span>
+              </article>
+              <article class="stat-card">
+                <span class="stat-icon blue">◎</span
+                ><span class="stat-label">Trip budget</span
+                ><strong id="tripBudget">₹0</strong
+                ><span class="stat-note">Your planned spending limit</span>
+              </article>
+              <article class="stat-card">
+                <span class="stat-icon green">↗</span
+                ><span class="stat-label">Budget remaining</span
+                ><strong id="budgetRemaining">₹0</strong
+                ><span class="stat-note" id="budgetNote"
+                  >Ready for your next adventure</span
+                >
+              </article>
+              <article class="stat-card">
+                <span class="stat-icon orange">♧</span
+                ><span class="stat-label">Group members</span
+                ><strong id="memberCount">0</strong
+                ><span class="stat-note">Splitting expenses equally</span>
+              </article>
+            </div>
+            <div class="two-cols">
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Spending breakdown</h3>
+                    <p>Where your money goes</p>
+                  </div>
+                  <span class="subtle-tag">By category</span>
+                </div>
+                <div class="chart-container">
+                  <canvas
+                    id="expenseChart"
+                    aria-label="Expense category chart"
+                    role="img"
+                  ></canvas>
+                  <div id="chartFallback" class="empty-chart">
+                    Add expenses to see your spending breakdown.
+                  </div>
+                </div>
+                <div id="categoryLegend" class="legend"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Budget health</h3>
+                    <p>How your trip is tracking</p>
+                  </div>
+                  <span class="subtle-tag">Live update</span>
+                </div>
+                <div class="budget-ring">
+                  <div class="ring" id="budgetRing">
+                    <div class="ring-inner">
+                      <strong id="budgetPercent">0%</strong><span>used</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="budget-row">
+                  <span>Spent <b id="budgetSpentSmall">₹0</b></span
+                  ><span>Budget <b id="budgetTotalSmall">₹0</b></span>
+                </div>
+                <div class="progress"><div id="budgetProgress"></div></div>
+                <p class="budget-message" id="budgetMessage">
+                  Set a trip budget to track your progress.
+                </p>
+              </article>
+            </div>
+            <article class="panel recent-panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Recent expenses</h3>
+                  <p>Your latest group spending</p>
+                </div>
+                <button class="text-btn" id="viewAll">View all →</button>
+              </div>
+              <div id="recentExpenses"></div>
+            </article>
+          </section>
+          <section id="expensesSection" class="section hidden">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>All expenses</h3>
+                  <p>Add, review, and remove trip expenses</p>
+                </div>
+                <div class="filter-wrap">
+                  <label for="categoryFilter">Category</label
+                  ><select id="categoryFilter">
+                    <option value="All">All categories</option>
+                    <option>Food</option>
+                    <option>Transport</option>
+                    <option>Stay</option>
+                    <option>Activities</option>
+                    <option>Shopping</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+              <div id="allExpenses"></div>
+            </article>
+          </section>
+          <section id="balancesSection" class="section hidden">
+            <div class="two-cols">
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Member balances</h3>
+                    <p>Positive = should receive, negative = owes</p>
+                  </div>
+                </div>
+                <div id="memberBalances"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>Suggested settlements</h3>
+                    <p>Simple payments to clear outstanding balances</p>
+                  </div>
+                </div>
+                <div id="settlementList"></div>
+                <p class="hint">
+                  These are suggestions only. TripSplit does not transfer real
+                  money.
+                </p>
+              </article>
+            </div>
+          </section>
+          <footer class="footer">
+            TripSplit · Your expenses stay in this browser ·
+            <button id="resetData" class="reset-link">Reset all data</button>
+          </footer>
+        </div>
+      </main>
+    </div>
+    <div
+      class="modal-overlay hidden"
+      id="tripModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tripModalTitle"
+    >
+      <form class="modal" id="tripForm">
+        <div class="modal-header">
+          <div>
+            <h2 id="tripModalTitle">Create your trip</h2>
+            <p>Start with a name, budget, and your travel crew.</p>
+          </div>
+          <button
+            type="button"
+            class="close-btn"
+            data-close="tripModal"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        <label for="tripNameInput">Trip name</label
+        ><input
+          id="tripNameInput"
+          maxlength="60"
+          placeholder="e.g. Manali Weekend"
+          required
+        /><label for="destinationInput">Destination</label
+        ><input
+          id="destinationInput"
+          maxlength="60"
+          placeholder="e.g. Manali"
+          required
+        /><label for="budgetInput">Total budget (₹)</label
+        ><input
+          id="budgetInput"
+          type="number"
+          min="1"
+          max="100000000"
+          step="0.01"
+          placeholder="10000"
+          required
+        /><label for="membersInput">Members (comma-separated names)</label
+        ><textarea
+          id="membersInput"
+          rows="3"
+          maxlength="500"
+          placeholder="Aman, Rahul, Priya"
+          required
+        ></textarea>
+        <p class="field-note">
+          Use unique names. Editing members will be disabled after expenses have
+          been added to preserve correct balances.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="outline-btn" data-close="tripModal">
+            Cancel</button
+          ><button type="submit" class="primary-btn">Save trip</button>
+        </div>
+      </form>
+    </div>
+    <div
+      class="modal-overlay hidden"
+      id="expenseModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="expenseModalTitle"
+    >
+      <form class="modal" id="expenseForm">
+        <div class="modal-header">
+          <div>
+            <h2 id="expenseModalTitle">Add an expense</h2>
+            <p>Split the bill equally among everyone.</p>
+          </div>
+          <button
+            type="button"
+            class="close-btn"
+            data-close="expenseModal"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        <label for="expenseTitle">Expense title</label
+        ><input
+          id="expenseTitle"
+          maxlength="70"
+          placeholder="e.g. Dinner at the cafe"
+          required
+        />
+        <div class="form-row">
+          <div>
+            <label for="expenseAmount">Amount (₹)</label
+            ><input
+              id="expenseAmount"
+              type="number"
+              min="0.01"
+              max="100000000"
+              step="0.01"
+              required
+            />
+          </div>
+          <div>
+            <label for="expenseCategory">Category</label
+            ><select id="expenseCategory">
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Stay</option>
+              <option>Activities</option>
+              <option>Shopping</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="expensePayer">Paid by</label
+            ><select id="expensePayer" required></select>
+          </div>
+          <div>
+            <label for="expenseDate">Date</label
+            ><input id="expenseDate" type="date" required />
+          </div>
+        </div>
+        <div class="split-preview" id="splitPreview">
+          Everyone shares the expense equally.
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="outline-btn" data-close="expenseModal">
+            Cancel</button
+          ><button type="submit" class="primary-btn">Add expense</button>
+        </div>
+      </form>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
